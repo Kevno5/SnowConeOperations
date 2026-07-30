@@ -1,46 +1,52 @@
 import { useEffect, useState } from "react";
 
-type HealthResponse = {
-  message: string;
-};
+interface InventoryItem {
+  id: number;
+  itemName: string;
+  quantity: number;
+  unitMeasured: string;
+}
+
 
 function App() {
-  const [message, setMessage] = useState("Checking backend...");
-  const [error, setError] = useState<string | null>(null);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function checkBackend() {
-      try {
-        const response = await fetch(
-          "https://localhost:7219/api/health"
-        );
-
-        if (!response.ok) {
-          throw new Error(`Request failed: ${response.status}`);
-        }
-
-        const data: HealthResponse = await response.json();
-        setMessage(data.message);
-      } catch (requestError) {
-        console.error(requestError);
-        setError("Could not connect to the backend.");
-      }
-    }
-
-    checkBackend();
+  useEffect(() =>{
+    fetch('https://localhost:7219/api/Inventory')
+    .then((response) => {
+      if ( !response.ok) throw new Error('Network Response failed');
+      return response.json();
+    })
+    .then((data) =>{
+      setInventoryItems(data);
+      setLoading(false);
+    })
+    .catch((error) => {
+      console.error('Error fetching inventory items:', error);
+      setLoading(false);
+    });
   }, []);
 
-  return (
-    <main>
-      <h1>Snow Cone Operations</h1>
+  if (loading) return <p>Loading data from backend</p>;
 
-      {error ? (
-        <p>{error}</p>
-      ) : (
-        <p>{message}</p>
-      )}
-    </main>
-  );
+  return (
+  <div>
+    <h2>Backend Data Stream</h2>
+    <ul>
+      {inventoryItems.map((item) => (
+        <ul key={item.id}>
+          <br></br>
+          {item.itemName}
+          <br></br>
+          {item.quantity}
+          <br></br>
+          {item.unitMeasured}
+        </ul>
+      ))}
+    </ul>
+  </div>
+);
 }
 
 export default App;
