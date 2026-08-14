@@ -1,7 +1,14 @@
+using Microsoft.EntityFrameworkCore;
 using SnowConeOperations.Api.Interfaces;
 using SnowConeOperations.Api.Services;
+using SnowConeOperations.Api.Data;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<SnowConeOperationsDbContext>(options =>
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 // Add services to the container.
 
@@ -9,7 +16,7 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddSingleton<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 builder.Services.AddCors(options =>
 {
@@ -28,6 +35,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
