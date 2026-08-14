@@ -1,0 +1,26 @@
+table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.tableHeader{
+    padding: 10px;
+    text-align: center;
+}
+
+.tableRow{
+    text-align: center;
+    padding: 10px;
+}
+
+.inventoryToolbar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.inventoryControls{
+    display: flex;
+    gap: 8px;
+}
