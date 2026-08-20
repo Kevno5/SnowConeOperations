@@ -3,9 +3,11 @@ import type { InventoryItem } from "../../types/InventoryItem";
 interface InventoryTableRowProps{
     item: InventoryItem;
     index: number;
+    handleEdit: (item: InventoryItem ) => void;
+    handleDelete: (item: InventoryItem) => void;
 }
 
-function InventoryTableRow({item, index} : InventoryTableRowProps){
+function InventoryTableRow({item, index, handleEdit, handleDelete} : InventoryTableRowProps){
 
     
     const formattedCreatedAtTime = new Date(item.createdAt).toLocaleString();
@@ -21,6 +23,10 @@ function InventoryTableRow({item, index} : InventoryTableRowProps){
             <td className="tableRow">{item.unitMeasured}</td>
             <td className="tableRow">{formattedCreatedAtTime}</td>
             <td className="tableRow">{formattedUpdatedAt}</td>
+            <td className="tableRow">
+                <button onClick={() => handleEdit(item)}>Edit</button>
+                <button onClick={() => handleDelete(item)}>Remove</button>
+            </td>
         </tr>
     )
 }

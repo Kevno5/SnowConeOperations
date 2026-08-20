@@ -1,6 +1,7 @@
 import axios from "axios";
 import type { InventoryItem } from "../types/InventoryItem";
-import type { InventoryItemUpdate } from "../types/inventoryItemUpdate";
+import type { InventoryItemUpdate } from "../types/InventoryItem";
+import type { InventoryItemCreate } from "../types/InventoryItem";
 
 export async function fetchInventory() : Promise<InventoryItem[]>  {
     const response = await axios.get<InventoryItem[]>(
@@ -16,3 +17,18 @@ export async function fetchInventory() : Promise<InventoryItem[]>  {
 
     return response.data;
   }
+
+  export async function addItem(data: InventoryItemCreate) :Promise<InventoryItem>  {
+    const response = await axios.post<InventoryItem>(
+      "https://localhost:7219/api/inventory", data
+    );
+    return response.data;
+  }
+
+  export async function deleteItem(id: number) : Promise<boolean> {
+    const response = await axios.delete<boolean>(
+      `https://localhost:7219/api/inventory/${id}`
+    );
+    return response.data
+  }
+

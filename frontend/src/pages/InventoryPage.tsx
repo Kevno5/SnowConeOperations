@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import EditItemForm from "../components/Inventory/EditItemForm";
-import type { InventoryItem } from "../types/InventoryItem";
-import { fetchInventory, updateInventory } from "../services/InventoryService";
+import type { InventoryItem, InventoryItemCreate } from "../types/InventoryItem";
+import { addItem, fetchInventory, updateInventory, deleteItem } from "../services/InventoryService";
 import InventoryTable from "../components/Inventory/InventoryTable";
+import CreateInventoryItemForm from "../components/Inventory/CreateItemForm";
 
 function InventoryPage() {
   const [inventoryItems, setInventoryItems] =
     useState<InventoryItem[]>([]);
-
-  const [editingItem, setEditingItem] =
-    useState<InventoryItem | null>(null);
+  const [editingItem, setEditingItem] = useState<InventoryItem|null> (null);
+  const [isCreating, setIsCreating] = useState(false);
+  
 
   useEffect(() => {
     fetchInventory().then((data) => {
@@ -17,51 +18,71 @@ function InventoryPage() {
     });
   }, []);
 
+  function handleEdit(item: InventoryItem){
+    setEditingItem(item);
+
+    console.log(item);
+  }
+  
+
   async function handleUpdate(item: InventoryItem) {
-    const updateData = {
-      itemName: item.itemName,
-      quantity: item.quantity,
-      unitMeasured: item.unitMeasured
+
+    const updatedItem = {
+      itemName : item.itemName,
+      quantity : item.quantity,
+      unitMeasured : item.unitMeasured
     }
-    await updateInventory(item.id, updateData);
 
-    const updatedData = await fetchInventory();
+    const savedItem = await updateInventory(item.id, updatedItem)
 
-    setInventoryItems(updatedData);
+    setInventoryItems(inventoryItems.map((currentItem) => {
+      if(currentItem.id == savedItem.id)
+      {
+        return savedItem;
+      }else{
+        return currentItem;
+      }
+    }))
 
+  }
+
+  async function handleCreate(item: InventoryItemCreate) {
+    const CreatedItem = await addItem(item);
+    const newInventoryList = [...inventoryItems, CreatedItem];
+    setInventoryItems(newInventoryList);
+
+    setIsCreating(false);
+  }
+
+  async function handleDelete(item: InventoryItem) {
+    await deleteItem(item.id);
+
+    const newInventoryList = inventoryItems.filter(
+      (currentItem) => currentItem.id !== item.id
+    );
+
+    setInventoryItems(newInventoryList);
+
+  }
+
+  function handleAddItem(){
+    setIsCreating(true)
+  }
+
+  function handleCancel() {
     setEditingItem(null);
+    setIsCreating(false);
   }
 
   return (
     <div>
       <h1>Inventory</h1>
 
-      <InventoryTable items={inventoryItems}/>
+      <InventoryTable items={inventoryItems} handleEdit={handleEdit} handleAddItem={handleAddItem} handleDelete={handleDelete}/>
 
-      {/* {inventoryItems.map((item) => (
-        <div key={item.id}>
-          <h3>{item.itemName}</h3>
-
-          <p>
-            Quantity: {item.quantity}
-            Units Measured: {item.unitMeasured}
-            Created At: {item.createdAt}
-            Updated At: {item.updatedAt}
-          </p>
-
-          <button onClick={() => setEditingItem(item)}>
-            Edit
-          </button>
-        </div>
-      ))} */}
-
-      {editingItem && (
-        <EditItemForm
-          item={editingItem}
-          onSave={handleUpdate}
-          onCancel={() => setEditingItem(null)}
-        />
-      )}
+      {editingItem && <EditItemForm item={editingItem} handleUpdate={handleUpdate} handleCancel={handleCancel}/> }
+      {isCreating && <CreateInventoryItemForm handleCreate={handleCreate} handleCancel={handleCancel}></CreateInventoryItemForm>}
+      
     </div>
   );
 }
